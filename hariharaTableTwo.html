@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Harihara Namamritam</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/alpinejs" defer></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+  <script>
+    // Initialize Firebase
+    const firebaseConfig = {
+          apiKey: "AIzaSyCpiz-ug2Io_Td-waHL7XWAZNGMoQiI8Gw",
+          authDomain: "firedex-ab3e5.firebaseapp.com",
+          projectId: "firedex-ab3e5",
+          storageBucket: "firedex-ab3e5.firebasestorage.app",
+          messagingSenderId: "534917927417",
+          appId: "1:534917927417:web:6d0bd287d44adddd9bed28",
+        };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+</head>
+
+<body x-data="app()" class="bg-gray-200x text-gray-700 font-poppins">
+    <!-- Page content begins -->
+    <div class="w-full md:w-3/4 p-4 mx-auto min-h-screen bg-white">
+      <div class="">
+        <h3 class="text-center mt-2">
+          श्रीश्रीजगद्गुरुशङ्कराचार्य महासंस्थानम्, दक्षिणाम्नाय श्रीशारदापीठम्,
+          शृङ्गेरी
+        </h3>
+        <h1 class="text-4xl font-bold text-center mt-4">हरिहरनामामृतम्</h1>
+      </div>
+      <!-- live snapshot of the backend database for public view -->
+    <div class="flex items-center justify-between mt-8 mb-4">
+      <input type="text" placeholder="Search..." class="p-2 border rounded w-3/4" x-model="searchQuery" />
+      <span class="ml-4"
+          >Total Entries: <span x-text="tableData.length"></span
+        ></span>
+    </div>
+
+    <!-- Table -->
+    <table class="min-w-full bg-white border border-gray-200 rounded-lg text-center">
+      <thead class="bg-gray-200">
+        <tr>
+          <th class="px-4 py-2 border">Name</th>
+          <th class="px-4 py-2 border">Age</th>
+          <th class="px-4 py-2 border">Gender</th>
+          <th class="px-4 py-2 border">Date</th>
+          <th class="px-4 py-2 border">City</th>
+        </tr>
+      </thead>
+      <tbody>
+        <template x-for="entry in filteredData" :key="entry.name + entry.date">
+          <tr>
+            <td class="px-4 py-2 border" x-text="entry.name"></td>
+            <td class="px-4 py-2 border" x-text="entry.age"></td>
+            <td class="px-4 py-2 border" x-text="entry.gender"></td>
+            <td class="px-4 py-2 border" x-text="entry.date"></td>
+            <td class="px-4 py-2 border" x-text="entry.city"></td>
+          </tr>
+        </template>
+      </tbody>
+    </table>
+  </div>
+
+  <script>
+    function app() {
+      return {
+        tableData: [],
+        searchQuery: '',
+
+        // Filtered data based on search query nd if its empty then show default result.
+        get filteredData() {
+          if (this.searchQuery.trim() === '') {
+            return this.tableData;
+          }
+          return this.tableData.filter(item => {
+            return (
+              item.name.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              item.age.toString().includes(this.searchQuery) ||
+              item.gender.toLowerCase().includes(this.searchQuery.toLowerCase()) ||
+              item.date.includes(this.searchQuery) ||
+              item.city.toLowerCase().includes(this.searchQuery.toLowerCase())
+            );
+          });
+        },
+
+        // Fetch data from Firestore and update the table
+        fetchData() {
+          db.collection("harihara").onSnapshot(snapshot => {
+            this.tableData = snapshot.docs.map(doc => doc.data());
+            // console.log("Firestore Data: ", this.tableData); // Logging the data to confirm
+          });
+        },
+
+        // Initialize the app and fetch the entries by default
+        init() {
+          this.fetchData();
+        }
+      }
+    }
+  </script>
+</body>
+
+</html>

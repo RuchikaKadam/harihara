@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Harihara Namamritam</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs" defer></script>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?display=swap&family=Poppins" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-firestore.js"></script>
+    <script>
+        const firebaseConfig = {
+          apiKey: "AIzaSyCpiz-ug2Io_Td-waHL7XWAZNGMoQiI8Gw",
+          authDomain: "firedex-ab3e5.firebaseapp.com",
+          projectId: "firedex-ab3e5",
+          storageBucket: "firedex-ab3e5.firebasestorage.app",
+          messagingSenderId: "534917927417",
+          appId: "1:534917927417:web:6d0bd287d44adddd9bed28",
+        };
+        firebase.initializeApp(firebaseConfig);
+        var db = firebase.firestore();
+    </script>
+    <style>
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body x-data="data()" class="bg-gray-200 text-gray-700 font-poppins">
+    <div class="w-full md:w-1/2 p-4 mx-auto min-h-screen bg-white">
+        <div>
+            <h3 class="text-center mt-2">श्रीश्रीजगद्गुरुशङ्कराचार्य महासंस्थानम्, दक्षिणाम्नाय श्रीशारदापीठम्, शृङ्गेरी</h3> 
+            <h1 class="text-4xl font-bold text-center mt-4">हरिहरनामामृतम्</h1>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+            <div class="bg-gray-200 p-4 rounded-lg shadow-lg">
+                <label for="date" class="block">Date</label>
+                <input type="date" id="date" x-model="newEntry.date" class="border border-gray-400 text-sm rounded px-4 py-2 w-full">
+            </div>
+            <div class="bg-gray-200 p-4 rounded-lg shadow-lg">
+                <label for="name" class="block">Name</label>
+                <input type="text" id="name" x-model="newEntry.name" class="border border-gray-400 text-sm rounded px-4 py-2 w-full">
+                <span x-show="errors.name" class="text-red-500 text-sm">Name must be at least 2 characters long.</span>
+            </div>
+            <div class="bg-gray-200 p-4 rounded-lg shadow-lg">
+                <label for="age" class="block">Age</label>
+                <input type="number" id="age" x-model="newEntry.age" class="border border-gray-400 text-sm rounded px-4 py-2 w-full">
+                <span x-show="errors.age" class="text-red-500 text-sm">Age must be between 5 and 120.</span>
+            </div>
+            <div class="bg-gray-200 p-4 rounded-lg shadow-lg">
+                <label for="gender" class="block">Gender</label>
+                <select id="gender" x-model="newEntry.gender" class="border border-gray-400 text-sm rounded px-4 py-2 w-full">
+                    <option value="">Select</option>
+                    <option value="M">Male</option>
+                    <option value="F">Female</option>
+                </select>
+            </div>
+            <div class="bg-gray-200 p-4 rounded-lg shadow-lg">
+                <label for="mobile" class="block">Mobile *</label>
+                <input type="number" id="mobile" x-model="newEntry.mobile" class="border border-gray-400 text-sm rounded px-4 py-2 w-full">
+                <span x-show="errors.mobile" class="text-red-500 text-sm">Mobile number is required.</span>
+            </div>
+            <div class="bg-gray-200 p-4 rounded-lg shadow-lg">
+                <label for="organisation" class="block">Organisation (if any)</label>
+                <input type="text" id="organisation" x-model="newEntry.organisation" class="border border-gray-400 text-sm rounded px-4 py-2 w-full">
+            </div>
+            <div class="bg-gray-200 p-4 rounded-lg shadow-lg">
+                <label for="place" class="block">Place *</label>
+                <input type="text" id="place" x-model="newEntry.place" class="border border-gray-400 text-sm rounded px-4 py-2 w-full">
+                <span x-show="errors.place" class="text-red-500 text-sm">Place is required.</span>
+            </div>
+            <div class="bg-gray-200 p-4 rounded-lg shadow-lg relative">
+                <label for="country" class="block">Country</label>
+                <input type="text" id="country" x-model="newEntry.country" class="border border-gray-400 text-sm rounded px-4 py-2 w-full" @keyup="filterCountries()">
+                <div class="absolute z-10 bg-white w-full border border-gray-400" x-show="filteredCountries.length > 0">
+                    <ul>
+                        <template x-for="country in filteredCountries">
+                            <li @click="setCountry(country)" class="p-2 cursor-pointer hover:bg-gray-300" x-text="country.name"></li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+            <div class="bg-gray-200 p-4 rounded-lg shadow-lg relative">
+                <label for="state" class="block">State</label>
+                <input type="text" id="state" x-model="newEntry.state" class="border border-gray-400 text-sm rounded px-4 py-2 w-full" @keyup="filterStates()">
+                <div class="absolute z-10 bg-white w-full border border-gray-400" x-show="filteredStates.length > 0">
+                    <ul>
+                        <template x-for="state in filteredStates">
+                            <li @click="setState(state)" class="p-2 cursor-pointer hover:bg-gray-300" x-text="state.name"></li>
+                        </template>
+                    </ul>
+                </div>
+            </div>
+            <div class="bg-gray-300 p-4 rounded-lg shadow-lg relative">
+                <label for="city" class="block">City</label>
+                <input type="text" id="city" x-model="newEntry.city" class="border border-gray-400 text-sm rounded px-4 py-2 w-full" @keyup="filterCities()">
+                <div class="absolute z-10 bg-white w-full border border-gray-400" x-show="filteredCities.length > 0">
+                    <ul>
+                        <template x-for="city in filteredCities">
+                            <li @click="setCity(city)" class="p-2 cursor-pointer hover:bg-gray-300" x-text="city.name"></li>
+                        </template>
+                    </ul>
+                </div>  
+            </div>
+        </div>
+        <div class="text-right mt-4">
+            <button class="text-gray-700 px-4 py-2" @click="resetEntry()">Reset</button>
+            <button class="bg-gray-700 text-gray-100 px-4 py-2 rounded shadow" @click="submitForm()">Submit</button>
+            <span x-show="formError" class="text-red-500 block mt-2">Please fill the required fields before submitting.</span>
+        </div>
+    </div>
+    <script>
+        function data() {
+            return {
+                init() {
+                    this.resetEntry();
+                    this.getCountries();
+                },
+                newEntry: {},
+                errors: {},
+                formError: false,
+                resetEntry() {
+                    this.newEntry = {
+                        date: "",
+                        name: "",
+                        age: "",
+                        gender: "",
+                        mobile: "",
+                        organisation: "",
+                        place: "",
+                        country: "",
+                        state: "",
+                        city: "",
+                    };
+                    this.errors = {};
+                    this.formError = false;
+                },
+                async submitForm() {
+                    this.validateForm();
+                    if (Object.keys(this.errors).length === 0) {
+                        await db.collection("harihara").add(this.newEntry);
+                        this.resetEntry();
+                    } else {
+                        this.formError = true;
+                    }
+                },
+                validateForm() {
+                    this.errors = {};
+                    if (!this.newEntry.name || this.newEntry.name.length < 2) {
+                        this.errors.name = true;
+                    }
+                    if (!this.newEntry.age || this.newEntry.age < 5 || this.newEntry.age > 120) {
+                        this.errors.age = true;
+                    }
+                    if (!this.newEntry.mobile) {
+                        this.errors.mobile = true;
+                    }
+                    if (!this.newEntry.place) {
+                        this.errors.place = true;
+                    }
+                },
+                placesAPI: { 
+                    url: "https://api.example.com/places", 
+                    countries: [], 
+                    states: [], 
+                    cities: [] 
+                },
+                filteredCountries: [],
+                filteredStates: [],
+                filteredCities: [],
+                getCountries() {
+                    // Simulate API call
+                    this.placesAPI.countries = [{ name: 'India' }, { name: 'USA' }, { name: 'Canada' }];
+                },
+                filterCountries() {
+                    this.filteredCountries = this.placesAPI.countries.filter(country =>
+                        country.name.toLowerCase().includes(this.newEntry.country.toLowerCase())
+                    );
+                },
+                setCountry(country) {
+                    this.newEntry.country = country.name;
+                    this.filteredCountries = [];
+                },
+                filterStates() {
+                    this.filteredStates = this.placesAPI.states.filter(state =>
+                        state.name.toLowerCase().includes(this.newEntry.state.toLowerCase())
+                    );
+                },
+                setState(state) {
+                    this.newEntry.state = state.name;
+                    this.filteredStates = [];
+                },
+                filterCities() {
+                    this.filteredCities = this.placesAPI.cities.filter(city =>
+                        city.name.toLowerCase().includes(this.newEntry.city.toLowerCase())
+                    );
+                },
+                setCity(city) {
+                    this.newEntry.city = city.name;
+                    this.filteredCities = [];
+                }
+            }
+        }
+    </script>
+</body>
+</html>
