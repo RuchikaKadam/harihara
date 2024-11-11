@@ -110,6 +110,14 @@
         </div>
     </div>
     <script>
+        function formatDate(date) {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day} ${month} ${year}`;
+}
         function data() {
             return {
                 init() {
@@ -138,6 +146,7 @@
                 async submitForm() {
                     this.validateForm();
                     if (Object.keys(this.errors).length === 0) {
+                        this.newEntry.date = formatDate(this.newEntry.date);
                         await db.collection("harihara").add(this.newEntry);
                         this.resetEntry();
                     } else {

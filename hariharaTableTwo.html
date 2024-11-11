@@ -56,10 +56,10 @@
       <tbody>
         <template x-for="entry in filteredData" :key="entry.name + entry.date">
           <tr>
-            <td class="px-4 py-2 border" x-text="entry.name"></td>
+            <td class="px-4 py-2 border text-left" x-text="entry.name"></td>
             <td class="px-4 py-2 border" x-text="entry.age"></td>
             <td class="px-4 py-2 border" x-text="entry.gender"></td>
-            <td class="px-4 py-2 border" x-text="entry.date"></td>
+            <td class="px-4 py-2 border" x-text="formatDate(entry.date)"></td>
             <td class="px-4 py-2 border" x-text="entry.city"></td>
           </tr>
         </template>
@@ -68,6 +68,14 @@
   </div>
 
   <script>
+    function formatDate(date) {
+    if (!date) return '';
+    const d = new Date(date);
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    return `${day}/${month}/${year}`;
+}
     function app() {
       return {
         tableData: [],
